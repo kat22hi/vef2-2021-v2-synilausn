@@ -1,10 +1,18 @@
-<%- include('header') -%>
+  
+<%- include('header', { title: 'Innskráning'}) -%>
 
+<h1>Innskráning</h1>
 <form method="post" action="/login">
-  <label>Notendanafn: <input type="text" name="username" /></label>
-  <label>Lykilorð: <input type="password" name="password" /></label>
+  <div class="field">
+    <label for="notendanafn">Notendanafn</label> <input type="text" name="username">
+  </div>
+  <div class="field">
+    <label for="lykilord">Lykilorð</label> <input type="password" name="password">
+  </div>
   <button>Innskrá</button>
 </form>
 <p><%= message %></p>
+
+<a href="/">Til baka</a>
 
 <%- include('footer') -%>
