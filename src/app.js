@@ -1,29 +1,38 @@
-import { join, dirname } from 'path';
-import { fileURLToPath } from 'url';
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
 
-import express from 'express';
-import dotenv from 'dotenv';
-import { format } from 'date-fns';
+import express from "express";
+import dotenv from "dotenv";
+import passport from "passport";
+import session from "express-session";
+import { format } from "date-fns";
+import { Strategy } from "passport-local";
 
-import { router as registrationRouter } from './registration.js';
+import { router as registrationRouter } from "./registration.js";
+import { router as adminRouter } from './admin.js'
+
+import {
+  comparePasswords,
+  findById,
+  findByUsername,
+} from './users.js';
 
 dotenv.config();
 
 const {
   PORT: port = 3000,
+  SESSION_SECRET: sessionSecret,
 } = process.env;
 
 const app = express();
 
-// Sér um að req.body innihaldi gögn úr formi
-app.use(express.urlencoded({ extended: true }));
 
 const path = dirname(fileURLToPath(import.meta.url));
 
-app.use(express.static(join(path, '../public')));
+app.use(express.static(join(path, "../public")));
 
-app.set('views', join(path, '../views'));
-app.set('view engine', 'ejs');
+app.set("views", join(path, "../views"));
+app.set("view engine", "ejs");
 
 /**
  * Hjálparfall til að athuga hvort reitur sé gildur eða ekki.
@@ -41,18 +50,20 @@ function isInvalid(field, errors = []) {
 app.locals.isInvalid = isInvalid;
 
 app.locals.formatDate = (str) => {
-  let date = '';
+  let date = "";
 
   try {
-    date = format(str || '', 'dd.MM.yyyy');
+    date = format(str || "", "dd.MM.yyyy");
   } catch {
-    return '';
+    return "";
   }
 
   return date;
 };
 
-app.use('/', registrationRouter);
+app.use("/", registrationRouter);
+app.use('/admin', ensureLoggedIn, adminRouter);
+
 
 /**
  * Middleware sem sér um 404 villur.
@@ -63,8 +74,8 @@ app.use('/', registrationRouter);
  */
 // eslint-disable-next-line no-unused-vars
 function notFoundHandler(req, res, next) {
-  const title = 'Síða fannst ekki';
-  res.status(404).render('error', { title });
+  const title = "Síða fannst ekki";
+  res.status(404).render("error", { title });
 }
 
 /**
@@ -78,12 +89,111 @@ function notFoundHandler(req, res, next) {
 // eslint-disable-next-line no-unused-vars
 function errorHandler(err, req, res, next) {
   console.error(err);
-  const title = 'Villa kom upp';
-  res.status(500).render('error', { title });
+  const title = "Villa kom upp";
+  res.status(500).render("error", { title });
 }
+
 
 app.use(notFoundHandler);
 app.use(errorHandler);
+
+// Passport mun verða notað með session
+// Sér um að req.body innihaldi gögn úr formi
+app.use(express.urlencoded({ extended: true }));
+app.use(session({
+  secret: sessionSecret,
+  resave: false,
+  saveUninitialized: false,
+}));
+
+
+async function strat(username, password, done) {
+  try {
+    const user = await findByUsername(username);
+
+    if (!user) {
+      return done(null, false);
+    }
+
+    // Verður annað hvort notanda hlutur ef lykilorð rétt, eða false
+    const result = await comparePasswords(password, user.password);
+    return done(null, result ? user: false);
+  } catch (err) {
+    console.error(err);
+    return done(err);
+  }
+}
+
+passport.use(new Strategy(strat));
+
+passport.serializeUser((user, done) => {
+  done(null, user.id);
+});
+
+passport.deserializeUser(async (id, done) => {
+  try {
+    const user = await findById(id);
+    return done(null, user);
+  } catch (error) {
+    return done(error);
+  }
+});
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+
+function ensureLoggedIn(req, res, next) {
+  if (req.isAuthenticated()) {
+    return next();
+  }
+
+  return res.redirect('/login');
+}
+
+app.get("/login", (req, res) => {
+  if (req.isAuthenticated()) {
+    return res.redirect("/");
+  }
+
+  let message = "";
+
+  // Athugum hvort einhver skilaboð séu til í session, ef svo er birtum þau
+  // og hreinsum skilaboð
+  if (req.session.messages && req.session.messages.length > 0) {
+    message = req.session.messages.join(", ");
+    req.session.messages = [];
+  }
+
+  // Ef við breytum name á öðrum hvorum reitnum að neðan mun ekkert virka
+  // nema við höfum stillt í samræmi, sjá línu 64
+  return res.send('login', { message });
+});
+
+app.post(
+  '/login',
+
+  // Þetta notar strat að ofan til að skrá notanda inn
+  passport.authenticate('local', {
+    failureMessage: "Notandanafn eða lykilorð vitlaust.",
+    failureRedirect: '/login',
+  }),
+
+  // Ef við komumst hingað var notandi skráður inn, senda á /admin
+  (req, res) => {
+    res.redirect('/admin');
+  }
+);
+
+app.get('/logout', (req, res) => {
+  req.logout();
+  res.redirect('/');
+});
+
+app.get('/deleteRow', ensureLoggedIn, (req, res) => {
+  console.log('id: ', req.id );
+  res.redirect('/admin');
+});
 
 // Verðum að setja bara *port* svo virki á heroku
 app.listen(port, () => {

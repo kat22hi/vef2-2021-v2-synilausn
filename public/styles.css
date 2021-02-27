@@ -45,6 +45,12 @@ h2 {
   font-size: 1rem;
 }
 
+h5 {
+  margin: 0;
+  text-align: center;
+  padding-bottom: 20px;
+}
+
 body {
   display: flex;
   flex-direction: column;
@@ -61,6 +67,18 @@ main {
 
 h1,
 h2 {
+  text-align: center;
+}
+
+.button__fyrri {
+  text-align: left;
+}
+
+.button__seinni {
+  text-align: right;
+}
+
+.label__sida {
   text-align: center;
 }
 

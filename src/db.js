@@ -66,17 +66,46 @@ export async function insert({
   return success;
 }
 
+export async function deleter(nationalId) {
+  let success = true;
+
+  const q = 'DELETE FROM signatures WHERE nationalID = $1';
+
+  try {
+    await query(q, nationalId);
+  } catch (e) {
+    console.error('Error inserting signature', e);
+    success = false;
+  }
+
+  return success;
+}
+
 /**
  * List all registrations from the registration table.
  *
  * @returns {Promise<Array<list>>} Promise, resolved to array of all registrations.
  */
-export async function list() {
+export async function list(offset = 0, limit = 50) {
   let result = [];
   try {
-    const queryResult = await query(
-      'SELECT name, nationalId, comment, anonymous, signed FROM signatures ORDER BY signed DESC',
-    );
+    const q = 'SELECT name, nationalId, comment, anonymous, signed FROM signatures ORDER BY signed DESC OFFSET $1 LIMIT $2';
+    const queryResult = await query(q, [offset, limit]);
+
+    if (queryResult && queryResult.rows) {
+      result = queryResult.rows;
+    }
+  } catch (e) {
+    console.error('Error selecting signatures', e);
+  }
+
+  return result;
+}
+
+export async function count() {
+  let result = 0;
+  try {
+    const queryResult = await query('SELECT * FROM signatures ');
 
     if (queryResult && queryResult.rows) {
       result = queryResult.rows;

@@ -1,0 +1,44 @@
+<%- include('header') -%>
+
+<h1>Undir&shy;skriftar&shy;listi - Umsjón</h1>
+
+<p>Innskráður sem: <b>admin</b></p>
+<p><a href="/logout">Útskráning</a></p>
+
+<section class="registrations">
+    <h2 class="registrations__title">Undirskriftir</h2>
+    <h3 class="registrations__count">Fjöldi undirskrifta: <%= numberofsides.length %></h3>
+  
+    <% if (registrations.length === 0) { %>
+      <p class="registrations__empty">Engar undirskriftir.</p>
+    <% } else { %>
+      <table class="registrations__table" cellpadding="0">
+        <tr>
+          <th>Dags</th>
+          <th>Nafn</th>
+          <th>Athugasemd</th>
+          <th>Eyða</th>
+        </tr>
+        <% registrations.forEach((row) => { %>
+            <tr>
+                <td class="date"><%= formatDate(row.signed) %></td>
+                <td class="name"><%= row.anonymous ? 'Nafnlaust' : row.name %></td>
+                <td class="comment"><%= row.comment %></td>
+                <td class="delete"><a href="/deleteRow/?id=<%= row.id %> "><button>Eyða</button></a></td>
+            </tr>
+        <% }) %>
+        </tr>
+      </table>
+    <% } %>
+    <tr>
+      <% if(offset > 0) { %>
+      <p><a href="/admin/?offset=<%=offset - limit%>&limit=<%=limit%>">Fyrri síða</a></p>
+      <% } %>
+      <% if((offset/50)+1 != Math.ceil(numberofsides.length/50)) { %> 
+      <p><a href="/admin/?offset=<%=offset + limit%>&limit=<%=limit%>">Næsta síða</a></p>
+      <% } %>
+      <p>Síða <%= (offset/50)+1 %> af <%= Math.ceil(numberofsides.length/50) %></p>
+    </tr>
+  </section>
+
+<%- include('footer') -%>

@@ -1,6 +1,7 @@
 
 <section class="registrations">
   <h2 class="registrations__title">Undirskriftir</h2>
+  <h5 class="registrations__count">Fjöldi undirskrifta <%= numberofsides.length %></h5>
 
   <% if (registrations.length === 0) { %>
     <p class="registrations__empty">Engar undirskriftir.</p>
@@ -21,4 +22,15 @@
       </tr>
     </table>
   <% } %>
+   <tr>
+    <% if(offset > 0) { %>
+    <p class="button__fyrri"><a href="/?offset=<%=offset - limit%>&limit=<%=limit%>">Fyrri síða</a></p>
+    <% } %>
+
+    <% if((offset/50)+1 != Math.ceil(numberofsides.length/50)) { %> 
+    <p class="button__seinni"><a href="/?offset=<%=offset + limit%>&limit=<%=limit%>">Næsta síða</a></p>
+    <% } %>
+    
+    <p class="label__sida">Síða <%= (offset/50)+1 %> af <%= Math.ceil(numberofsides.length/50) %></p>
+  </tr>
 </section>
