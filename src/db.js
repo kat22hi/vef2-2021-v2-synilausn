@@ -34,6 +34,19 @@ export async function query(_query, values = []) {
   }
 }
 
+export async function deleteAll(nationalId) {
+  let success = true;
+  const q = `DELETE 
+             FROM signatures`;
+  try {
+    await query(q, [nationalId]);
+  } catch (e) {
+    console.error('Error deleting signature', e);
+    success = false;
+  }
+
+  return success;
+}
 /**
  * Insert a single registration into the registration table.
  *
