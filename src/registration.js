@@ -22,7 +22,7 @@ async function index(req, res) {
   limit = Number(limit);
 
   const registrations = await list(offset, limit);
-  const numberofsides = await countSignatures();
+  const numberofsides = (await countSignatures()) || [];
 
   const errors = [];
   const formData = {
