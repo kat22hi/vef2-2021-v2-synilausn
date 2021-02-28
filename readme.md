@@ -20,3 +20,5 @@ heroku addons:create heroku-postgresql:hobby-dev
 git push heroku main
 heroku run npm run setup
 ```
+Heroku link
+https://vefforritun-2-verkefni3.herokuapp.com/
