@@ -1,40 +1,36 @@
-import { join, dirname } from 'path';
-import { fileURLToPath } from 'url';
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
 
-import express from 'express';
-import passport from 'passport';
-import session from 'express-session';
-import dotenv from 'dotenv';
-import { format } from 'date-fns';
-import { Strategy } from 'passport-local';
+import express from "express";
+import passport from "passport";
+import session from "express-session";
+import dotenv from "dotenv";
+import { format } from "date-fns";
+import { Strategy } from "passport-local";
 
-import { router as registrationRouter } from './registration.js';
-import { router as adminRouter } from './admin.js';
+import { router as registrationRouter } from "./registration.js";
+import { router as adminRouter } from "./admin.js";
 
-import {
-  findByUsername,
-  findById,
-  comparePasswords,
-} from './users.js';
+import { findByUsername, findById, comparePasswords } from "./users.js";
 
 dotenv.config();
 
-const sessionSecret = 'leyndarmál';
+const sessionSecret = "leyndarmál";
 
-const {
-  PORT: port = 3000,
-} = process.env;
+const { PORT: port = 3000 } = process.env;
 
 const app = express();
 
 // Passport mun verða notað með session
 // Sér um að req.body innihaldi gögn úr formi
 app.use(express.urlencoded({ extended: true }));
-app.use(session({
-  secret: sessionSecret,
-  resave: false,
-  saveUninitialized: false,
-}));
+app.use(
+  session({
+    secret: sessionSecret,
+    resave: false,
+    saveUninitialized: false,
+  })
+);
 
 passport.serializeUser((user, done) => {
   done(null, user.id);
@@ -57,7 +53,7 @@ function ensureLoggedIn(req, res, next) {
     return next();
   }
 
-  return res.redirect('/login');
+  return res.redirect("/login");
 }
 
 async function strat(username, password, done) {
@@ -79,44 +75,43 @@ async function strat(username, password, done) {
 
 passport.use(new Strategy(strat));
 
-
-app.get('/logout', (req, res) => {
+app.get("/logout", (req, res) => {
   req.logout();
-  res.redirect('/');
+  res.redirect("/");
 });
 
-app.get('/login', (req, res) => {
+app.get("/login", (req, res) => {
   if (req.isAuthenticated()) {
-    return res.redirect('/');
+    return res.redirect("/");
   }
 
-  let message = '';
+  let message = "";
 
   // Athugum hvort einhver skilaboð séu til í session, ef svo er birtum þau
   // og hreinsum skilaboð
   if (req.session.messages && req.session.messages.length > 0) {
-    message = req.session.messages.join(', ');
+    message = req.session.messages.join(", ");
     req.session.messages = [];
   }
 
-  return res.render('login', { message });
+  return res.render("login", { message });
 });
 
 app.post(
-  '/login',
-  passport.authenticate('local', {
-    failureMessage: 'Notendanafn eða lykilorð vitlaust.',
-    failureRedirect: '/login',
+  "/login",
+  passport.authenticate("local", {
+    failureMessage: "Notendanafn eða lykilorð vitlaust.",
+    failureRedirect: "/login",
   }),
   (req, res) => {
-    res.redirect('/admin');
-  },
+    res.redirect("/admin");
+  }
 );
 
 const path = dirname(fileURLToPath(import.meta.url));
-app.use(express.static(join(path, '../public')));
-app.set('views', join(path, '../views'));
-app.set('view engine', 'ejs');
+app.use(express.static(join(path, "../public")));
+app.set("views", join(path, "../views"));
+app.set("view engine", "ejs");
 
 /**
  * Hjálparfall til að athuga hvort reitur sé gildur eða ekki.
@@ -134,19 +129,19 @@ function isInvalid(field, errors = []) {
 app.locals.isInvalid = isInvalid;
 
 app.locals.formatDate = (str) => {
-  let date = '';
+  let date = "";
 
   try {
-    date = format(str || '', 'dd.MM.yyyy');
+    date = format(str || "", "dd.MM.yyyy");
   } catch {
-    return '';
+    return "";
   }
 
   return date;
 };
 
-app.use('/', registrationRouter);
-app.use('/admin', ensureLoggedIn, adminRouter);
+app.use("/", registrationRouter);
+app.use("/admin", ensureLoggedIn, adminRouter);
 
 /**
  * Middleware sem sér um 404 villur.
@@ -157,8 +152,8 @@ app.use('/admin', ensureLoggedIn, adminRouter);
  */
 // eslint-disable-next-line no-unused-vars
 function notFoundHandler(req, res, next) {
-  const title = 'Síða fannst ekki';
-  res.status(404).render('error', { title });
+  const title = "Síða fannst ekki";
+  res.status(404).render("error", { title });
 }
 
 /**
@@ -172,8 +167,8 @@ function notFoundHandler(req, res, next) {
 // eslint-disable-next-line no-unused-vars
 function errorHandler(err, req, res, next) {
   console.error(err);
-  const title = 'Villa kom upp';
-  res.status(500).render('error', { title });
+  const title = "Villa kom upp";
+  res.status(500).render("error", { title });
 }
 
 app.use(notFoundHandler);

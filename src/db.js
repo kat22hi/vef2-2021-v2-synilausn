@@ -1,25 +1,25 @@
-import pg from 'pg';
-import dotenv from 'dotenv';
+import pg from "pg";
+import dotenv from "dotenv";
 
 dotenv.config();
 
 const {
   DATABASE_URL: connectionString,
-  NODE_ENV: nodeEnv = 'development',
+  NODE_ENV: nodeEnv = "development",
 } = process.env;
 
 if (!connectionString) {
-  console.error('Vantar DATABASE_URL');
+  console.error("Vantar DATABASE_URL");
   process.exit(1);
 }
 
 // Notum SSL tengingu við gagnagrunn ef við erum *ekki* í development mode, þ.e.a.s. á local vél
-const ssl = nodeEnv !== 'development' ? { rejectUnauthorized: false } : false;
+const ssl = nodeEnv !== "development" ? { rejectUnauthorized: false } : false;
 
 const pool = new pg.Pool({ connectionString, ssl });
 
-pool.on('error', (err) => {
-  console.error('Villa í tengingu við gagnagrunn, forrit hættir', err);
+pool.on("error", (err) => {
+  console.error("Villa í tengingu við gagnagrunn, forrit hættir", err);
   process.exit(-1);
 });
 
@@ -43,9 +43,7 @@ export async function query(_query, values = []) {
  * @param {boolean} entry.anonymous – If the registrants name should be displayed or not
  * @returns {Promise<boolean>} Promise, resolved as true if inserted, otherwise false
  */
-export async function insert({
-  name, nationalId, comment, anonymous,
-} = {}) {
+export async function insert({ name, nationalId, comment, anonymous } = {}) {
   let success = true;
 
   const q = `
@@ -54,12 +52,12 @@ export async function insert({
     VALUES
       ($1, $2, $3, $4);
   `;
-  const values = [name, nationalId, comment, anonymous === 'on'];
+  const values = [name, nationalId, comment, anonymous === "on"];
 
   try {
     await query(q, values);
   } catch (e) {
-    console.error('Error inserting signature', e);
+    console.error("Error inserting signature", e);
     success = false;
   }
 
@@ -80,8 +78,7 @@ export async function countSignatures() {
   return result;
 }
 
-export async function deleteSignature({nationalId,
-} = {}) {
+export async function deleteSignature({ nationalId } = {}) {
   let success = true;
   const q = `DELETE 
              FROM signatures 
@@ -89,7 +86,7 @@ export async function deleteSignature({nationalId,
   try {
     await query(q, [nationalId]);
   } catch (e) {
-    console.error('Error deleting signature', e);
+    console.error("Error deleting signature", e);
     success = false;
   }
 
@@ -113,11 +110,10 @@ export async function list(offset = 0, limit = 50) {
       result = queryResult.rows;
     }
   } catch (e) {
-    console.error('Error selecting signatures', e);
+    console.error("Error selecting signatures", e);
   }
   return result;
 }
-
 
 // Helper to remove pg from the event loop
 export async function end() {
