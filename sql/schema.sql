@@ -6,3 +6,9 @@ CREATE TABLE IF NOT EXISTS signatures(
   anonymous boolean not null default true,
   signed timestamp with time zone not null default current_timestamp
 );
+
+CREATE TABLE IF NOT EXISTS users (
+  id SERIAL PRIMARY KEY,
+  username CHARACTER VARYING(255) NOT NULL,
+  password CHARACTER VARYING(255) NOT NULL
+  );

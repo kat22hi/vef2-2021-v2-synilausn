@@ -1,5 +1,6 @@
-import express from "express";
-import { list, deleteSignature, countSignatures } from "./db.js";
+import express from 'express';
+import { list, deleteSignature, countSignatures } from './db.js';
+
 export const router = express.Router();
 
 function catchErrors(fn) {
@@ -10,7 +11,7 @@ async function erase(req, res) {
   let success = true;
 
   if (!req.isAuthenticated()) {
-    return res.redirect("/admin/login");
+    return res.redirect('/admin/login');
   }
   const { id } = req.body;
 
@@ -20,11 +21,11 @@ async function erase(req, res) {
     console.error(e);
   }
   if (success) {
-    return res.redirect("/admin");
+    return res.redirect('/admin');
   }
-  return res.render("error", {
-    title: "Villa við að eyða",
-    text: "",
+  return res.render('error', {
+    title: 'Villa við að eyða',
+    text: '',
   });
 }
 
@@ -37,7 +38,7 @@ async function admin(req, res) {
   limit = Number(limit);
 
   const registrations = await list(offset, limit);
-  res.render("admin", {
+  res.render('admin', {
     errors,
     registrations,
     offset,
@@ -46,5 +47,5 @@ async function admin(req, res) {
   });
 }
 
-router.get("/", catchErrors(admin));
-router.post("/delete", catchErrors(erase), catchErrors(admin));
+router.get('/', catchErrors(admin));
+router.post('/delete', catchErrors(erase), catchErrors(admin));

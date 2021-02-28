@@ -1,8 +1,8 @@
-import express from "express";
-import { body, validationResult } from "express-validator";
-import xss from "xss";
+import express from 'express';
+import { body, validationResult } from 'express-validator';
+import xss from 'xss';
 
-import { list, insert, countSignatures } from "./db.js";
+import { list, insert, countSignatures } from './db.js';
 
 export const router = express.Router();
 
@@ -26,13 +26,13 @@ async function index(req, res) {
 
   const errors = [];
   const formData = {
-    name: "",
-    nationalId: "",
+    name: '',
+    nationalId: '',
     anonymous: false,
-    comment: "",
+    comment: '',
   };
 
-  res.render("index", {
+  res.render('index', {
     errors,
     formData,
     registrations,
@@ -42,39 +42,41 @@ async function index(req, res) {
   });
 }
 
-const nationalIdPattern = "^[0-9]{6}-?[0-9]{4}$";
+const nationalIdPattern = '^[0-9]{6}-?[0-9]{4}$';
 
 const validationMiddleware = [
-  body("name").isLength({ min: 1 }).withMessage("Nafn má ekki vera tómt"),
-  body("name")
+  body('name').isLength({ min: 1 }).withMessage('Nafn má ekki vera tómt'),
+  body('name')
     .isLength({ max: 128 })
-    .withMessage("Nafn má að hámarki vera 128 stafir"),
-  body("nationalId")
+    .withMessage('Nafn má að hámarki vera 128 stafir'),
+  body('nationalId')
     .isLength({ min: 1 })
-    .withMessage("Kennitala má ekki vera tóm"),
-  body("nationalId")
+    .withMessage('Kennitala má ekki vera tóm'),
+  body('nationalId')
     .matches(new RegExp(nationalIdPattern))
-    .withMessage("Kennitala verður að vera á formi 000000-0000 eða 0000000000"),
-  body("comment")
+    .withMessage('Kennitala verður að vera á formi 000000-0000 eða 0000000000'),
+  body('comment')
     .isLength({ max: 400 })
-    .withMessage("Athugasemd má að hámarki vera 400 stafir"),
+    .withMessage('Athugasemd má að hámarki vera 400 stafir'),
 ];
 
 // Viljum keyra sér og með validation, ver gegn „self XSS“
 const xssSanitizationMiddleware = [
-  body("name").customSanitizer((v) => xss(v)),
-  body("nationalId").customSanitizer((v) => xss(v)),
-  body("comment").customSanitizer((v) => xss(v)),
-  body("anonymous").customSanitizer((v) => xss(v)),
+  body('name').customSanitizer((v) => xss(v)),
+  body('nationalId').customSanitizer((v) => xss(v)),
+  body('comment').customSanitizer((v) => xss(v)),
+  body('anonymous').customSanitizer((v) => xss(v)),
 ];
 
 const sanitizationMiddleware = [
-  body("name").trim().escape(),
-  body("nationalId").blacklist("-"),
+  body('name').trim().escape(),
+  body('nationalId').blacklist('-'),
 ];
 
 async function validationCheck(req, res, next) {
-  const { name, nationalId, comment, anonymous } = req.body;
+  const {
+    name, nationalId, comment, anonymous,
+  } = req.body;
 
   const formData = {
     name,
@@ -87,7 +89,7 @@ async function validationCheck(req, res, next) {
   const validation = validationResult(req);
 
   if (!validation.isEmpty()) {
-    return res.render("index", {
+    return res.render('index', {
       formData,
       errors: validation.errors,
       registrations,
@@ -98,7 +100,9 @@ async function validationCheck(req, res, next) {
 }
 
 async function register(req, res) {
-  const { name, nationalId, comment, anonymous } = req.body;
+  const {
+    name, nationalId, comment, anonymous,
+  } = req.body;
 
   let success = true;
 
@@ -114,22 +118,22 @@ async function register(req, res) {
   }
 
   if (success) {
-    return res.redirect("/");
+    return res.redirect('/');
   }
 
-  return res.render("error", {
-    title: "Gat ekki skráð!",
-    text: "Hafðir þú skrifað undir áður?",
+  return res.render('error', {
+    title: 'Gat ekki skráð!',
+    text: 'Hafðir þú skrifað undir áður?',
   });
 }
 
-router.get("/", catchErrors(index));
+router.get('/', catchErrors(index));
 
 router.post(
-  "/",
+  '/',
   validationMiddleware,
   xssSanitizationMiddleware,
   catchErrors(validationCheck),
   sanitizationMiddleware,
-  catchErrors(register)
+  catchErrors(register),
 );
