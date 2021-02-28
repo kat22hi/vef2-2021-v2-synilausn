@@ -24,21 +24,26 @@
                 <td class="date"><%= formatDate(row.signed) %></td>
                 <td class="name"><%= row.anonymous ? 'Nafnlaust' : row.name %></td>
                 <td class="comment"><%= row.comment %></td>
-                <td class="delete"><a href="/deleteRow/?id=<%= row.id %> "><button>Eyða</button></a></td>
+                <td class="delete"> <form style = "all: revert;" method="post" name = "<%= row.id %>" action="/admin/delete" enctype="application/x-www-form-urlencoded"> <input hidden class ="id" name = "id" id = "id" value = <%= row.id %>></input><button class = "remove">Eyða</button> </form></td>
             </tr>
         <% }) %>
         </tr>
       </table>
     <% } %>
-    <tr>
-      <% if(offset > 0) { %>
-      <p><a href="/admin/?offset=<%=offset - limit%>&limit=<%=limit%>">Fyrri síða</a></p>
-      <% } %>
-      <% if((offset/50)+1 != Math.ceil(numberofsides.length/50)) { %> 
-      <p><a href="/admin/?offset=<%=offset + limit%>&limit=<%=limit%>">Næsta síða</a></p>
-      <% } %>
-      <p>Síða <%= (offset/50)+1 %> af <%= Math.ceil(numberofsides.length/50) %></p>
-    </tr>
   </section>
+
+  <section class="fletta">
+    <% if(offset > 0) { %>
+    <p><a href="/admin/?offset=<%=offset - limit%>&limit=<%=limit%>">Fyrri síða</a></p>
+    <% } else { %>
+        <p></p>
+    <% } %>
+    <p>Síða <%= (offset/50)+1 %> af <%= Math.ceil(numberofsides.length/50) %></p>
+    <% if((offset/50)+1 != Math.ceil(numberofsides.length/50)) { %> 
+    <p><a href="/admin/?offset=<%=offset + limit%>&limit=<%=limit%>">Næsta síða</a></p>
+    <% } else { %>
+        <p></p>
+    <% } %>
+    </section>
 
 <%- include('footer') -%>

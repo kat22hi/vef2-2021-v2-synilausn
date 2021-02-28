@@ -12,9 +12,9 @@ import { router as registrationRouter } from './registration.js';
 import { router as adminRouter } from './admin.js';
 
 import {
-  comparePasswords,
   findByUsername,
   findById,
+  comparePasswords,
 } from './users.js';
 
 dotenv.config();
@@ -105,7 +105,7 @@ app.get('/login', (req, res) => {
 app.post(
   '/login',
   passport.authenticate('local', {
-    failureMessage: 'Notandanafn eða lykilorð vitlaust.',
+    failureMessage: 'Notendanafn eða lykilorð vitlaust.',
     failureRedirect: '/login',
   }),
   (req, res) => {

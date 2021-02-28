@@ -1,6 +1,7 @@
 import { readFile } from 'fs/promises';
 import { query, end } from './db.js';
 import faker from 'faker';
+import { createNewUser } from './users.js';
 
 
 const schemaFile = './sql/schema.sql';
@@ -23,6 +24,12 @@ INSERT INTO signatures
   }
 }
 
+await query(`CREATE TABLE IF NOT EXISTS users (
+  id SERIAL PRIMARY KEY,
+  username CHARACTER VARYING(255) NOT NULL,
+  password CHARACTER VARYING(255) NOT NULL
+  );`);
+
 
 async function create() {
   const data = await readFile(schemaFile);
@@ -32,6 +39,8 @@ async function create() {
   console.info('Schema created');
 
   await mock(500);
+  
+  await createNewUser('admin', '123');
 
   console.info('Mock data inserted');
 

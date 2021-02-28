@@ -2,7 +2,7 @@ import express from 'express';
 import { body, validationResult } from 'express-validator';
 import xss from 'xss';
 
-import { list, insert, count } from './db.js';
+import { list, insert, countSignatures } from './db.js';
 
 export const router = express.Router();
 
@@ -17,6 +17,14 @@ function catchErrors(fn) {
 }
 
 async function index(req, res) {
+
+  let { offset = 0, limit = 50 } = req.query;
+  offset = Number(offset);
+  limit = Number(limit);
+
+  const registrations = await list(offset, limit);
+  const numberofsides = await countSignatures();
+
   const errors = [];
   const formData = {
     name: '',
@@ -24,13 +32,6 @@ async function index(req, res) {
     anonymous: false,
     comment: '',
   };
-  
-  let { offset = 0, limit = 50 } = req.query;
-  offset = Number(offset);
-  limit = Number(limit);
-
-  const registrations = await list(offset, limit);
-  const numberofsides = await count();
 
   res.render('index', {
     errors, formData, registrations, offset, limit, numberofsides

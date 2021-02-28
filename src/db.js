@@ -66,12 +66,26 @@ export async function insert({
   return success;
 }
 
-export async function deleter({
-  nationalId,
+export async function countSignatures() {
+  let result = 0;
+  try {
+    const queryResult = await query(`SELECT * 
+                                     FROM signatures `);
+    if (queryResult && queryResult.rows) {
+      result = queryResult.rows;
+    }
+  } catch (e) {
+    console.error(err);
+  }
+  return result;
+}
+
+export async function deleteSignature({nationalId,
 } = {}) {
   let success = true;
-
-  const q = 'DELETE FROM signatures WHERE id = $1';
+  const q = `DELETE 
+             FROM signatures 
+             WHERE id = $1`;
   try {
     await query(q, [nationalId]);
   } catch (e) {
@@ -90,8 +104,10 @@ export async function deleter({
 export async function list(offset = 0, limit = 50) {
   let result = [];
   try {
-    const q = 'SELECT name, nationalId, comment, anonymous, signed FROM signatures ORDER BY signed DESC OFFSET $1 LIMIT $2';
-    const queryResult = await query(q, [offset, limit]);
+    const __q = `SELECT * 
+                 FROM signatures 
+                 ORDER BY signed DESC OFFSET $1 LIMIT $2`;
+    const queryResult = await query(__q, [offset, limit]);
 
     if (queryResult && queryResult.rows) {
       result = queryResult.rows;
@@ -99,24 +115,9 @@ export async function list(offset = 0, limit = 50) {
   } catch (e) {
     console.error('Error selecting signatures', e);
   }
-
   return result;
 }
 
-export async function count() {
-  let result = 0;
-  try {
-    const queryResult = await query('SELECT * FROM signatures ');
-
-    if (queryResult && queryResult.rows) {
-      result = queryResult.rows;
-    }
-  } catch (e) {
-    console.error('Error selecting signatures', e);
-  }
-
-  return result;
-}
 
 // Helper to remove pg from the event loop
 export async function end() {

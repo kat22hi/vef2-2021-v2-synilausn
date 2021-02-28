@@ -8,11 +8,10 @@
   },
   "scripts": {
     "dev": "nodemon ./src/app.js",
+    "fix": "eslint --fix ./src",
     "test": "eslint ./src",
     "start": "node ./src/app.js",
-    "setup": "node ./src/setup.js",
-    "lint": "eslint ./src --ext .ts",
-    "lint:fix": "npm run lint -- --fix"
+    "setup": "node ./src/setup.js"
   },
   "keywords": [],
   "author": "",
